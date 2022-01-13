@@ -15,12 +15,16 @@ COPY . .
 
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main .
 
-
 FROM ubuntu:latest
 
 WORKDIR /root/
 
+RUN apt-get update
+RUN apt-get install ca-certificates -y
+
 COPY --from=builder /app/main .
-COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /usr/local/share/ca-certificates
+
+RUN update-ca-certificates
 
 ENTRYPOINT ["./main"]
