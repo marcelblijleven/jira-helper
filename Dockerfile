@@ -3,6 +3,7 @@ FROM golang:alpine as builder
 LABEL maintainer="Marcel Blijleven <marcelblijleven@gmail.com>"
 
 RUN apk update && apk add --no-cache git
+RUN apk --no-cache add ca-certificates
 
 WORKDIR /app
 
@@ -20,5 +21,6 @@ FROM ubuntu:latest
 WORKDIR /root/
 
 COPY --from=builder /app/main .
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs
 
 ENTRYPOINT ["./main"]
