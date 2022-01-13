@@ -114,6 +114,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: test
     steps:
+      - uses: actions/checkout@v2
       - name: Store current tag in GITHUB_ENV
         run: echo "CURRENT_TAG=$(git describe --tags)" >> $GITHUB_ENV
       - name: Push docker image to container registry
