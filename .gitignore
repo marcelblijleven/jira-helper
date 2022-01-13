@@ -22,3 +22,7 @@ go.work
 
 # Ignore jetbrains .idea folder
 .idea
+
+# Ignore build folder and jira-helper build
+build
+jira-helper
