@@ -122,7 +122,8 @@ jobs:
           REGISTRY: ghcr.io
           USERNAME: marcelblijleven
           IMAGE_NAME: ghcr.io/marcelblijleven/${{ github.event.repository.name }}
-      - run: docker build -t ${{ env.IMAGE_NAME }}:${{ env.CURRENT_TAG }} -f Dockerfile .
+      - run: docker build -t ${{ env.IMAGE_NAME }} -f Dockerfile .
       - run: echo ${{ secrets.GITHUB_TOKEN }} | docker login ${{ env.REGISTRY }} --username ${{ env.USERNAME }} --password-stdin
-      - run: docker tag ${{ env.IMAGE_NAME }}:${{ env.CURRENT_TAG }} ${{ env.IMAGE_NAME }}:latest
+      - run: docker tag ${{ env.IMAGE_NAME }} ${{ env.IMAGE_NAME }}:latest
+      - run: docker tag ${{ env.IMAGE_NAME }} ${{ env.IMAGE_NAME }}:${{ env.CURRENT_TAG }}
       - run: docker push ${{ env.IMAGE_NAME }} --all-tags
