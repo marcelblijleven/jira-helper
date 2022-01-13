@@ -1,8 +1,32 @@
 # Jira Helper
 Helper tool to interact with Jira from CI/CD scripts. Its main purpose is to create and assign version
-based on Github releases to Jira tickets.
+based on GitHub releases to Jira tickets.
 
-## Usage
+## GitHub actions example
+The following can be used to trigger a release (fixVersion) in Jira whenever a GitHub release is created. It will use the body of the
+release and search for any issue numbers in it and automatically assign the newly created release to them.
+```yaml
+name: Release
+
+on:
+  release:
+    types:
+      - released
+
+jobs:
+  release-to-jira:
+    runs-on: ubuntu-latest
+    env:
+      IMAGE_NAME: ghcr.io/marcelblijleven/jira-helper:latest
+    steps:
+      - name: create release in Jira
+        run: docker run -i --rm ${{ env.IMAGE_NAME }} createRelease -u marcel@test.nu -s https://your-jira.address.nl -p MB -t=${{ secrets.API_TOKEN }} -v "${{ github.event.release.name }}"
+      - name: assign release to Jira tickets
+        run: docker run -i --rm ${{ env.IMAGE_NAME }} assignVersion -u marcel@test.nu -s https://your-jira.address.nl -p MB -t=${{ secrets.API_TOKEN }} -v "${{ github.event.release.name }}" -b "${{ github.event.release.body }}"
+
+```
+
+## CLI Usage
 ```
 Usage:
   jira-helper [command]
