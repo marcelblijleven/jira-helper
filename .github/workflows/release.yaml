@@ -123,7 +123,7 @@ jobs:
         env:
           REGISTRY: ghcr.io
           USERNAME: marcelblijleven
-          IMAGE_NAME: docker push ghcr.io/marcelblijleven/${{ github.event.repository.name }}:${{ env.CURRENT_TAG }}
+          IMAGE_NAME: ghcr.io/marcelblijleven/${{ github.event.repository.name }}:${{ env.CURRENT_TAG }}
         run: |
           docker build -t ${{ env.IMAGE_NAME }} -f Dockerfile .
           echo ${{ secrets.GITHUB_TOKEN }} | docker login ${{ env.REGISTRY }} --username ${{ env.USERNAME }} --password-stdin
