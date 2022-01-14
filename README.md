@@ -5,6 +5,7 @@ based on GitHub releases to Jira tickets.
 ## GitHub actions example
 The following can be used to trigger a release (fixVersion) in Jira whenever a GitHub release is created. It will use the body of the
 release and search for any issue numbers in it and automatically assign the newly created release to them.
+
 ```yaml
 name: Release
 
@@ -53,7 +54,7 @@ Usage:
 Flags:
   -h, --help                 help for assignVersion
   -s, --host string          host of the Jira API
-  -p, --project string       Abbreviation of the Jira project, e.g. GGWM
+  -p, --project string       Abbreviation of the Jira project, e.g. MB
   -b, --releaseBody string   The body of the Github release
   -t, --token string         Token used to authenticate against the Jira API
   -u, --user string          user used for authenticating against the Jira API
@@ -73,9 +74,29 @@ Usage:
 Flags:
   -h, --help             help for createRelease
   -s, --host string      host of the Jira API
-  -p, --project string   Abbreviation of the Jira project, e.g. GGWM
+  -p, --project string   Abbreviation of the Jira project, e.g. MB
   -t, --token string     Token used to authenticate against the Jira API
   -u, --user string      user used for authenticating against the Jira API
   -v, --version string   Version name
 
+```
+
+### Create and assign
+Creates a fix version in Jira and assigns it to the provided issues.
+
+The release state of the fix version will be set to "released" and the day will be set to
+today.
+
+```
+Usage:
+jira-helper createAndAssign [flags]
+
+Flags:
+-h, --help                 help for createAndAssign
+-s, --host string          host of the Jira API
+-p, --project string       Abbreviation of the Jira project, e.g. MB
+-b, --releaseBody string   The body of the Github release
+-t, --token string         Token used to authenticate against the Jira API
+-u, --user string          user used for authenticating against the Jira API
+-v, --version string       Version name
 ```
