@@ -36,6 +36,6 @@ const (
 	bodyUsage     = "The body of text which contains Jira issues, e.g. a GitHub release body"
 
 	issuesFlagName  = "issues"
-	issuesShorthand = "s"
+	issuesShorthand = "i"
 	issuesUsage     = "The issues you want to assign to release to, can be a single issue or comma separated"
 )
