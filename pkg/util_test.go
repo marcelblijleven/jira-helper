@@ -23,7 +23,7 @@ For changes in this version, see the changelog
 Merge commit that triggered this release: feat: marcel introduces c0ffee (MB-1337, MB-1337)`
 
 	result := extractIssuesFromText(body)
-	assert.Equal(t, []string{"MB-1337"}, result)
+	assert.Equal(t, []string{"MB-1337", "MB-1337"}, result)
 }
 
 func Test_removeDuplicates(t *testing.T) {
@@ -83,7 +83,7 @@ Merge commit that triggered this release: feat: marcel introduces c0ffee (MB-133
 	assert.Equal(t, "{\"update\":{\"fixVersions\":[{\"add\":{\"name\":\"My first version\"}}]}}", mockClient.CalledWith[0])
 }
 
-func TestAssignVersions_multipleTickets(t *testing.T) {
+func TestAssignVersions_multipleIssues(t *testing.T) {
 	mockClient := NewMockHttpClient(t, 201)
 	jiraClient, err := NewJiraClient("https://test.nu", "marcel@test.nu", "c0ffee", mockClient)
 
@@ -97,6 +97,84 @@ For changes in this version, see the changelog
 Merge commit that triggered this release: feat: marcel introduces c0ffee (MB-1337, MB-1338)`
 
 	err = AssignVersions(releaseBody, "My first version", jiraClient)
+	assert.NoError(t, err)
+	assert.Equal(t, 2, mockClient.CalledTimes)
+	assert.Equal(t, []string{
+		"{\"update\":{\"fixVersions\":[{\"add\":{\"name\":\"My first version\"}}]}}",
+		"{\"update\":{\"fixVersions\":[{\"add\":{\"name\":\"My first version\"}}]}}",
+	}, mockClient.CalledWith)
+}
+
+func TestAssignVersions_singleIssue(t *testing.T) {
+	mockClient := NewMockHttpClient(t, 201)
+	jiraClient, err := NewJiraClient("https://test.nu", "marcel@test.nu", "c0ffee", mockClient)
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	err = AssignVersions("", "My first version", jiraClient, "MB-1234")
+	assert.NoError(t, err)
+	assert.Equal(t, 1, mockClient.CalledTimes)
+	assert.Equal(t, []string{
+		"{\"update\":{\"fixVersions\":[{\"add\":{\"name\":\"My first version\"}}]}}",
+	}, mockClient.CalledWith)
+}
+
+func TestAssignVersions_duplicateIssue(t *testing.T) {
+	mockClient := NewMockHttpClient(t, 201)
+	jiraClient, err := NewJiraClient("https://test.nu", "marcel@test.nu", "c0ffee", mockClient)
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	err = AssignVersions("", "My first version", jiraClient, "MB-1234", "MB-1234")
+	assert.NoError(t, err)
+	assert.Equal(t, 1, mockClient.CalledTimes)
+	assert.Equal(t, []string{
+		"{\"update\":{\"fixVersions\":[{\"add\":{\"name\":\"My first version\"}}]}}",
+	}, mockClient.CalledWith)
+}
+
+func TestAssignVersions_multipleIssuesFromBodyAndSeparate(t *testing.T) {
+	mockClient := NewMockHttpClient(t, 201)
+	jiraClient, err := NewJiraClient("https://test.nu", "marcel@test.nu", "c0ffee", mockClient)
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	releaseBody := `This is an automated release.
+For changes in this version, see the changelog
+
+Merge commit that triggered this release: feat: marcel introduces c0ffee (MB-1337, MB-1338)`
+
+	err = AssignVersions(releaseBody, "My first version", jiraClient, "MB-1339", "MB-1340")
+	assert.NoError(t, err)
+	assert.Equal(t, 4, mockClient.CalledTimes)
+	assert.Equal(t, []string{
+		"{\"update\":{\"fixVersions\":[{\"add\":{\"name\":\"My first version\"}}]}}",
+		"{\"update\":{\"fixVersions\":[{\"add\":{\"name\":\"My first version\"}}]}}",
+		"{\"update\":{\"fixVersions\":[{\"add\":{\"name\":\"My first version\"}}]}}",
+		"{\"update\":{\"fixVersions\":[{\"add\":{\"name\":\"My first version\"}}]}}",
+	}, mockClient.CalledWith)
+}
+
+func TestAssignVersions_multipleIssuesFromBodyAndSeparate_withDuplicates(t *testing.T) {
+	mockClient := NewMockHttpClient(t, 201)
+	jiraClient, err := NewJiraClient("https://test.nu", "marcel@test.nu", "c0ffee", mockClient)
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	releaseBody := `This is an automated release.
+For changes in this version, see the changelog
+
+Merge commit that triggered this release: feat: marcel introduces c0ffee (MB-1337, MB-1338)`
+
+	err = AssignVersions(releaseBody, "My first version", jiraClient, "MB-1337", "MB-1338")
 	assert.NoError(t, err)
 	assert.Equal(t, 2, mockClient.CalledTimes)
 	assert.Equal(t, []string{

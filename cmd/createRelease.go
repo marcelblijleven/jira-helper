@@ -53,9 +53,5 @@ today.`,
 
 func init() {
 	rootCmd.AddCommand(createReleaseCmd)
-	createReleaseCmd.Flags().StringVarP(&user, "user", "u", "", "user used for authenticating against the Jira API")
-	createReleaseCmd.Flags().StringVarP(&host, "host", "s", "", "host of the Jira API")
-	createReleaseCmd.Flags().StringVarP(&project, "project", "p", "", "Abbreviation of the Jira project, e.g. GGWM")
-	createReleaseCmd.Flags().StringVarP(&token, "token", "t", "", "Token used to authenticate against the Jira API")
-	createReleaseCmd.Flags().StringVarP(&version, "version", "v", "", "Version name")
+	createReleaseCmd.Aliases = []string{"createVersion"}
 }

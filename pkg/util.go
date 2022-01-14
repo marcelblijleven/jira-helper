@@ -60,16 +60,17 @@ func removeDuplicates(items []string) []string {
 	return filtered
 }
 
-// extractIssuesFromText gathers all unique ticket numbers from the provided text
+// extractIssuesFromText gathers all issue numbers from the provided text
 func extractIssuesFromText(text string) []string {
 	r := regexp.MustCompile("[A-Z]+-[0-9]+")
-	return removeDuplicates(r.FindAllString(text, -1))
+	return r.FindAllString(text, -1)
 }
 
 // AssignVersions extracts the issues from  the provided release body and calls the AssignVersion endpoint of the
 // jira client.
-func AssignVersions(releaseBody, version string, client *JiraClient) error {
-	issues := extractIssuesFromText(releaseBody)
+func AssignVersions(releaseBody, version string, client *JiraClient, issues ...string) error {
+	issues = append(issues, extractIssuesFromText(releaseBody)...)
+	issues = removeDuplicates(issues)
 
 	for _, issue := range issues {
 		if err := client.AssignVersion(issue, version); err != nil {
