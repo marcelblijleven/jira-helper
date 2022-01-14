@@ -31,7 +31,7 @@ var assignReleaseCmd = &cobra.Command{
 	Short: "Assigns a version to all provided issues in the release body",
 	Long: `Assigns a version to all provided issues. The issue numbers are retrieved from
 the provided release body.`,
-	RunE: func(cmd *cobra.Command, args []string) error {
+	Run: func(cmd *cobra.Command, args []string) {
 		if body == "" && (issues == nil || len(issues) == 0) {
 			cobra.CheckErr(errors.New("no issues provided. Provide issue through the issues and/or releaseBody flags"))
 		}
@@ -39,18 +39,8 @@ the provided release body.`,
 		httpClient := http.DefaultClient
 		httpClient.Timeout = time.Second * 15
 		client, err := pkg.NewJiraClient(host, user, token, httpClient)
-
-		if err != nil {
-			return err
-		}
-
-		err = pkg.AssignVersions(body, version, client, issues...)
-
-		if err != nil {
-			return err
-		}
-
-		return nil
+		cobra.CheckErr(err)
+		cobra.CheckErr(pkg.AssignVersions(body, version, client, issues...))
 	},
 }
 

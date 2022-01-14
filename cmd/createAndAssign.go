@@ -33,7 +33,7 @@ var createAndAssignCmd = &cobra.Command{
 
 The release state of the fix version will be set to "released" and the day will be set to 
 today.`,
-	RunE: func(cmd *cobra.Command, args []string) error {
+	Run: func(cmd *cobra.Command, args []string) {
 		if body == "" && (issues == nil || len(issues) == 0) {
 			cobra.CheckErr(errors.New("no issues provided. Provide issue through the issues and/or releaseBody flags"))
 		}
@@ -41,24 +41,9 @@ today.`,
 		httpClient := http.DefaultClient
 		httpClient.Timeout = time.Second * 15
 		client, err := pkg.NewJiraClient(host, user, token, httpClient)
-
-		if err != nil {
-			return err
-		}
-
-		err = client.CreateFixVersion(version, project)
-
-		if err != nil {
-			return err
-		}
-
-		err = pkg.AssignVersions(body, version, client, issues...)
-
-		if err != nil {
-			return err
-		}
-
-		return nil
+		cobra.CheckErr(err)
+		cobra.CheckErr(client.CreateFixVersion(version, project))
+		cobra.CheckErr(pkg.AssignVersions(body, version, client, issues...))
 	},
 }
 
