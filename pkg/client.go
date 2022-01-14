@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 )
@@ -81,6 +82,33 @@ func (c *JiraClient) createRequest(method, endpoint string, body interface{}) (*
 	return req, nil
 }
 
+func (c *JiraClient) doRequest(req *http.Request, target interface{}) error {
+	res, err := c.httpClient.Do(req)
+
+	if err != nil {
+		return fmt.Errorf("could not do request: %w", err)
+	}
+
+	if res.StatusCode/100 != 2 {
+		return handleJiraError(res)
+	}
+
+	if target != nil {
+		data, readErr := ioutil.ReadAll(res.Body)
+		defer res.Body.Close()
+
+		if readErr != nil {
+			return fmt.Errorf("request has status %s, but could not read response %w", res.Status, readErr)
+		}
+
+		if unmarshallErr := json.Unmarshal(data, &target); unmarshallErr != nil {
+			return fmt.Errorf("request has status %s, but could not process response: %w", res.Status, unmarshallErr)
+		}
+	}
+
+	return nil
+}
+
 // AssignVersion calls the issue endpoint to add a fixVersion to the issue
 func (c *JiraClient) AssignVersion(issue, version string) error {
 	endpoint := fmt.Sprintf("%s/issue/%s", apiEndpoint, issue)
@@ -92,20 +120,11 @@ func (c *JiraClient) AssignVersion(issue, version string) error {
 
 	req, err := c.createRequest(http.MethodPut, endpoint, body)
 
-	if err != nil {
+	if err = c.doRequest(req, nil); err != nil {
 		return err
 	}
 
-	res, err := c.httpClient.Do(req)
-
-	if err != nil {
-		return fmt.Errorf("could not do request: %w", err)
-	}
-
-	if res.StatusCode/100 != 2 {
-		return fmt.Errorf("assign version unsuccessful: %v", res.Status)
-	}
-
+	fmt.Printf("assigned version %q to %q\n", version, issue)
 	return nil
 }
 
@@ -124,15 +143,12 @@ func (c *JiraClient) CreateFixVersion(name, project string) error {
 		return err
 	}
 
-	res, err := c.httpClient.Do(req)
+	var response createResponse
 
-	if err != nil {
-		return fmt.Errorf("could not do request: %w", err)
+	if err = c.doRequest(req, &response); err != nil {
+		return fmt.Errorf("could not create fix version: %w", err)
 	}
 
-	if res.StatusCode/100 != 2 {
-		return fmt.Errorf("create fix version unsuccessful: %v", res.Status)
-	}
-
+	fmt.Printf("successfully created release %q with id %q\n", response.Name, response.Id)
 	return nil
 }

@@ -24,3 +24,22 @@ type fixVersion struct {
 type addFixVersion struct {
 	Name string `json:"name"`
 }
+
+type JiraError struct {
+	ErrorMessages []interface{} `json:"errorMessages"`
+	Errors        struct {
+		Name string `json:"name"`
+	} `json:"errors"`
+}
+
+// createResponse represents the response from the Jira api when calling the create fix version endpoint
+type createResponse struct {
+	Self            string `json:"self"`
+	Id              string `json:"id"`
+	Name            string `json:"name"`
+	Archived        bool   `json:"archived"`
+	Released        bool   `json:"released"`
+	ReleaseDate     string `json:"releaseDate"`
+	UserReleaseDate string `json:"userReleaseDate"`
+	ProjectId       int    `json:"projectId"`
+}

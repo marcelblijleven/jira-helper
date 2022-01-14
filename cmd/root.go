@@ -36,4 +36,15 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize()
+	rootCmd.PersistentFlags().StringVarP(&user, userFlagName, userShorthand, "", userUsage)
+	rootCmd.PersistentFlags().StringVarP(&host, hostFlagName, hostShorthand, "", hostUsage)
+	rootCmd.PersistentFlags().StringVarP(&project, projectFlagName, projectShorthand, "", projectUsage)
+	rootCmd.PersistentFlags().StringVarP(&token, tokenFlagName, tokenShorthand, "", tokenUsage)
+	rootCmd.PersistentFlags().StringVarP(&version, versionFlagName, versionShorthand, "", versionUsage)
+
+	cobra.CheckErr(rootCmd.MarkPersistentFlagRequired(userFlagName))
+	cobra.CheckErr(rootCmd.MarkPersistentFlagRequired(hostFlagName))
+	cobra.CheckErr(rootCmd.MarkPersistentFlagRequired(projectFlagName))
+	cobra.CheckErr(rootCmd.MarkPersistentFlagRequired(tokenFlagName))
+	cobra.CheckErr(rootCmd.MarkPersistentFlagRequired(versionFlagName))
 }

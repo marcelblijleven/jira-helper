@@ -17,6 +17,7 @@ limitations under the License.
 package cmd
 
 import (
+	"errors"
 	"jira-helper/pkg"
 	"net/http"
 	"time"
@@ -24,37 +25,28 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// assignVersionCmd represents the assignVersion command
-var assignVersionCmd = &cobra.Command{
-	Use:   "assignVersion",
+// assignReleaseCmd represents the assignVersion command
+var assignReleaseCmd = &cobra.Command{
+	Use:   "assignRelease",
 	Short: "Assigns a version to all provided issues in the release body",
 	Long: `Assigns a version to all provided issues. The issue numbers are retrieved from
 the provided release body.`,
-	RunE: func(cmd *cobra.Command, args []string) error {
+	Run: func(cmd *cobra.Command, args []string) {
+		if body == "" && (issues == nil || len(issues) == 0) {
+			cobra.CheckErr(errors.New("no issues provided. Provide issue through the issues and/or releaseBody flags"))
+		}
+
 		httpClient := http.DefaultClient
 		httpClient.Timeout = time.Second * 15
 		client, err := pkg.NewJiraClient(host, user, token, httpClient)
-
-		if err != nil {
-			return err
-		}
-
-		err = pkg.AssignVersions(body, version, client)
-
-		if err != nil {
-			return err
-		}
-
-		return nil
+		cobra.CheckErr(err)
+		cobra.CheckErr(pkg.AssignVersions(body, version, client, issues...))
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(assignVersionCmd)
-	assignVersionCmd.Flags().StringVarP(&user, "user", "u", "", "user used for authenticating against the Jira API")
-	assignVersionCmd.Flags().StringVarP(&host, "host", "s", "", "host of the Jira API")
-	assignVersionCmd.Flags().StringVarP(&project, "project", "p", "", "Abbreviation of the Jira project, e.g. GGWM")
-	assignVersionCmd.Flags().StringVarP(&token, "token", "t", "", "Token used to authenticate against the Jira API")
-	assignVersionCmd.Flags().StringVarP(&version, "version", "v", "", "Version name")
-	assignVersionCmd.Flags().StringVarP(&body, "releaseBody", "b", "", "The body of the Github release")
+	rootCmd.AddCommand(assignReleaseCmd)
+	assignReleaseCmd.Aliases = []string{"assignVersion"}
+	assignReleaseCmd.Flags().StringVarP(&body, bodyFlagName, bodyShorthand, "", bodyUsage)
+	assignReleaseCmd.Flags().StringSliceVarP(&issues, issuesFlagName, issuesShorthand, []string{}, issuesUsage)
 }

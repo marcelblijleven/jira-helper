@@ -1,8 +1,11 @@
 package pkg
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"net/http"
 	"regexp"
 	"time"
 )
@@ -60,16 +63,17 @@ func removeDuplicates(items []string) []string {
 	return filtered
 }
 
-// extractIssuesFromText gathers all unique ticket numbers from the provided text
+// extractIssuesFromText gathers all issue numbers from the provided text
 func extractIssuesFromText(text string) []string {
 	r := regexp.MustCompile("[A-Z]+-[0-9]+")
-	return removeDuplicates(r.FindAllString(text, -1))
+	return r.FindAllString(text, -1)
 }
 
 // AssignVersions extracts the issues from  the provided release body and calls the AssignVersion endpoint of the
 // jira client.
-func AssignVersions(releaseBody, version string, client *JiraClient) error {
-	issues := extractIssuesFromText(releaseBody)
+func AssignVersions(releaseBody, version string, client *JiraClient, issues ...string) error {
+	issues = append(issues, extractIssuesFromText(releaseBody)...)
+	issues = removeDuplicates(issues)
 
 	for _, issue := range issues {
 		if err := client.AssignVersion(issue, version); err != nil {
@@ -78,4 +82,21 @@ func AssignVersions(releaseBody, version string, client *JiraClient) error {
 	}
 
 	return nil
+}
+
+// handleJiraError retrieves and formats the error from the Jira api response
+func handleJiraError(res *http.Response) error {
+	var jiraError JiraError
+	data, readErr := ioutil.ReadAll(res.Body)
+	defer res.Body.Close()
+
+	if readErr != nil {
+		return fmt.Errorf("request unsuccessful (%s), could not read response: %w", res.Status, readErr)
+	}
+
+	if unmarshallErr := json.Unmarshal(data, &jiraError); unmarshallErr != nil {
+		return fmt.Errorf("request unsuccessful (%s), could not read response: %w", res.Status, unmarshallErr)
+	}
+
+	return fmt.Errorf("request unsuccessful (%s): %s", res.Status, jiraError.Errors.Name)
 }

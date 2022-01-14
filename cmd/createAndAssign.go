@@ -17,6 +17,7 @@ limitations under the License.
 package cmd
 
 import (
+	"errors"
 	"jira-helper/pkg"
 	"net/http"
 	"time"
@@ -32,37 +33,22 @@ var createAndAssignCmd = &cobra.Command{
 
 The release state of the fix version will be set to "released" and the day will be set to 
 today.`,
-	RunE: func(cmd *cobra.Command, args []string) error {
+	Run: func(cmd *cobra.Command, args []string) {
+		if body == "" && (issues == nil || len(issues) == 0) {
+			cobra.CheckErr(errors.New("no issues provided. Provide issue through the issues and/or releaseBody flags"))
+		}
+
 		httpClient := http.DefaultClient
 		httpClient.Timeout = time.Second * 15
 		client, err := pkg.NewJiraClient(host, user, token, httpClient)
-
-		if err != nil {
-			return err
-		}
-
-		err = client.CreateFixVersion(version, project)
-
-		if err != nil {
-			return err
-		}
-
-		err = pkg.AssignVersions(body, version, client)
-
-		if err != nil {
-			return err
-		}
-
-		return nil
+		cobra.CheckErr(err)
+		cobra.CheckErr(client.CreateFixVersion(version, project))
+		cobra.CheckErr(pkg.AssignVersions(body, version, client, issues...))
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(createAndAssignCmd)
-	createAndAssignCmd.Flags().StringVarP(&user, "user", "u", "", "user used for authenticating against the Jira API")
-	createAndAssignCmd.Flags().StringVarP(&host, "host", "s", "", "host of the Jira API")
-	createAndAssignCmd.Flags().StringVarP(&project, "project", "p", "", "Abbreviation of the Jira project, e.g. GGWM")
-	createAndAssignCmd.Flags().StringVarP(&token, "token", "t", "", "Token used to authenticate against the Jira API")
-	createAndAssignCmd.Flags().StringVarP(&version, "version", "v", "", "Version name")
-	createAndAssignCmd.Flags().StringVarP(&body, "releaseBody", "b", "", "The body of the Github release")
+	createAndAssignCmd.Flags().StringVarP(&body, bodyFlagName, bodyShorthand, "", bodyUsage)
+	createAndAssignCmd.Flags().StringSliceVarP(&issues, issuesFlagName, issuesShorthand, []string{}, issuesUsage)
 }
