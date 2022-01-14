@@ -1,8 +1,11 @@
 package pkg
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"net/http"
 	"regexp"
 	"time"
 )
@@ -79,4 +82,21 @@ func AssignVersions(releaseBody, version string, client *JiraClient, issues ...s
 	}
 
 	return nil
+}
+
+// handleJiraError retrieves and formats the error from the Jira api response
+func handleJiraError(res *http.Response) error {
+	var jiraError JiraError
+	data, readErr := ioutil.ReadAll(res.Body)
+	defer res.Body.Close()
+
+	if readErr != nil {
+		return fmt.Errorf("request unsuccessful (%s), could not read response: %w", res.Status, readErr)
+	}
+
+	if unmarshallErr := json.Unmarshal(data, &jiraError); unmarshallErr != nil {
+		return fmt.Errorf("request unsuccessful (%s), could not read response: %w", res.Status, unmarshallErr)
+	}
+
+	return fmt.Errorf("request unsuccessful (%s): %s", res.Status, jiraError.Errors.Name)
 }
