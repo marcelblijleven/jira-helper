@@ -1,8 +1,11 @@
 package pkg
 
 import (
+	"bytes"
 	"github.com/stretchr/testify/assert"
+	"io/ioutil"
 	"log"
+	"net/http"
 	"testing"
 )
 
@@ -181,4 +184,18 @@ Merge commit that triggered this release: feat: marcel introduces c0ffee (MB-133
 		"{\"update\":{\"fixVersions\":[{\"add\":{\"name\":\"My first version\"}}]}}",
 		"{\"update\":{\"fixVersions\":[{\"add\":{\"name\":\"My first version\"}}]}}",
 	}, mockClient.CalledWith)
+}
+
+func Test_handleJiraError(t *testing.T) {
+	body := bytes.NewReader([]byte("{\"errorMessages\":[],\"errors\":{\"name\":\"A version with this name already exists in this project.\"}}"))
+	res := &http.Response{Status: "Bad request", StatusCode: http.StatusBadRequest, Body: ioutil.NopCloser(body)}
+	err := handleJiraError(res)
+	assert.EqualError(t, err, "request unsuccessful (Bad request): A version with this name already exists in this project.")
+}
+
+func Test_handleJiraError_unreadableResponse(t *testing.T) {
+	body := bytes.NewReader([]byte("test body"))
+	res := &http.Response{Status: "Bad request", StatusCode: http.StatusBadRequest, Body: ioutil.NopCloser(body)}
+	err := handleJiraError(res)
+	assert.EqualError(t, err, "request unsuccessful (Bad request), could not read response: invalid character 'e' in literal true (expecting 'r')")
 }

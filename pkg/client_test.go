@@ -1,6 +1,7 @@
 package pkg
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
@@ -36,10 +37,11 @@ func (m *MockHttpClient) Do(req *http.Request) (*http.Response, error) {
 	m.CalledHeaders = req.Header
 
 	if m.statusCode == http.StatusBadRequest {
-		return &http.Response{StatusCode: http.StatusBadRequest, Status: "bad request"}, nil
+		body := bytes.NewReader([]byte("{\"errorMessages\":[],\"errors\":{\"name\":\"A version with this name already exists in this project.\"}}"))
+		return &http.Response{Status: "Bad request", StatusCode: http.StatusBadRequest, Body: ioutil.NopCloser(body)}, nil
 	}
-
-	return &http.Response{StatusCode: m.statusCode}, nil
+	body := bytes.NewReader([]byte("{\"hello\": \"world\"}"))
+	return &http.Response{Status: "Created", StatusCode: http.StatusCreated, Body: ioutil.NopCloser(body)}, nil
 }
 
 func TestNewJiraClient(t *testing.T) {
@@ -110,7 +112,7 @@ func TestJiraClient_CreateFixVersion_non20X(t *testing.T) {
 
 	err = jiraClient.CreateFixVersion("test version", "MB")
 	assert.Equal(t, 1, mockClient.CalledTimes)
-	assert.EqualError(t, err, "create fix version unsuccessful: bad request")
+	assert.EqualError(t, err, "could not create fix version: request unsuccessful (Bad request): A version with this name already exists in this project.")
 }
 
 func TestJiraClient_AssignVersion(t *testing.T) {
@@ -139,5 +141,5 @@ func TestJiraClient_AssignVersion_non20X(t *testing.T) {
 	}
 
 	err = jiraClient.AssignVersion("MB-1337", "My first release")
-	assert.EqualError(t, err, "assign version unsuccessful: bad request")
+	assert.EqualError(t, err, "request unsuccessful (Bad request): A version with this name already exists in this project.")
 }
