@@ -40,7 +40,7 @@ the provided release body.`,
 		httpClient.Timeout = time.Second * 15
 		client, err := pkg.NewJiraClient(host, user, token, httpClient)
 		cobra.CheckErr(err)
-		cobra.CheckErr(pkg.AssignVersions(body, version, client, issues...))
+		cobra.CheckErr(pkg.AssignVersions(body, version, client, issues, filter))
 	},
 }
 
@@ -49,4 +49,5 @@ func init() {
 	assignReleaseCmd.Aliases = []string{"assignVersion"}
 	assignReleaseCmd.Flags().StringVarP(&body, bodyFlagName, bodyShorthand, "", bodyUsage)
 	assignReleaseCmd.Flags().StringSliceVarP(&issues, issuesFlagName, issuesShorthand, []string{}, issuesUsage)
+	assignReleaseCmd.Flags().StringSliceVarP(&filter, filterFlagName, filterShorthand, []string{}, filterUsage)
 }
