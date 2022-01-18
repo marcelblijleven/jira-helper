@@ -80,7 +80,7 @@ For changes in this version, see the changelog
 
 Merge commit that triggered this release: feat: marcel introduces c0ffee (MB-1337)`
 
-	err = AssignVersions(releaseBody, "My first version", jiraClient)
+	err = AssignVersions(releaseBody, "My first version", jiraClient, nil, nil)
 	assert.NoError(t, err)
 	assert.Equal(t, 1, mockClient.CalledTimes)
 	assert.Equal(t, "{\"update\":{\"fixVersions\":[{\"add\":{\"name\":\"My first version\"}}]}}", mockClient.CalledWith[0])
@@ -99,7 +99,7 @@ For changes in this version, see the changelog
 
 Merge commit that triggered this release: feat: marcel introduces c0ffee (MB-1337, MB-1338)`
 
-	err = AssignVersions(releaseBody, "My first version", jiraClient)
+	err = AssignVersions(releaseBody, "My first version", jiraClient, nil, nil)
 	assert.NoError(t, err)
 	assert.Equal(t, 2, mockClient.CalledTimes)
 	assert.Equal(t, []string{
@@ -116,7 +116,7 @@ func TestAssignVersions_singleIssue(t *testing.T) {
 		log.Fatalln(err)
 	}
 
-	err = AssignVersions("", "My first version", jiraClient, "MB-1234")
+	err = AssignVersions("", "My first version", jiraClient, []string{"MB-1234"}, nil)
 	assert.NoError(t, err)
 	assert.Equal(t, 1, mockClient.CalledTimes)
 	assert.Equal(t, []string{
@@ -132,7 +132,7 @@ func TestAssignVersions_duplicateIssue(t *testing.T) {
 		log.Fatalln(err)
 	}
 
-	err = AssignVersions("", "My first version", jiraClient, "MB-1234", "MB-1234")
+	err = AssignVersions("", "My first version", jiraClient, []string{"MB-1234", "MB-1234"}, nil)
 	assert.NoError(t, err)
 	assert.Equal(t, 1, mockClient.CalledTimes)
 	assert.Equal(t, []string{
@@ -153,7 +153,7 @@ For changes in this version, see the changelog
 
 Merge commit that triggered this release: feat: marcel introduces c0ffee (MB-1337, MB-1338)`
 
-	err = AssignVersions(releaseBody, "My first version", jiraClient, "MB-1339", "MB-1340")
+	err = AssignVersions(releaseBody, "My first version", jiraClient, []string{"MB-1339", "MB-1340"}, nil)
 	assert.NoError(t, err)
 	assert.Equal(t, 4, mockClient.CalledTimes)
 	assert.Equal(t, []string{
@@ -177,7 +177,7 @@ For changes in this version, see the changelog
 
 Merge commit that triggered this release: feat: marcel introduces c0ffee (MB-1337, MB-1338)`
 
-	err = AssignVersions(releaseBody, "My first version", jiraClient, "MB-1337", "MB-1338")
+	err = AssignVersions(releaseBody, "My first version", jiraClient, []string{"MB-1337", "MB-1338"}, nil)
 	assert.NoError(t, err)
 	assert.Equal(t, 2, mockClient.CalledTimes)
 	assert.Equal(t, []string{
@@ -198,4 +198,55 @@ func Test_handleJiraError_unreadableResponse(t *testing.T) {
 	res := &http.Response{Status: "Bad request", StatusCode: http.StatusBadRequest, Body: ioutil.NopCloser(body)}
 	err := handleJiraError(res)
 	assert.EqualError(t, err, "request unsuccessful (Bad request), could not read response: invalid character 'e' in literal true (expecting 'r')")
+}
+
+func Test_filterSlice(t *testing.T) {
+	type args struct {
+		main   []string
+		filter []string
+	}
+	tests := []struct {
+		name string
+		args args
+		want []string
+	}{
+		{
+			name: "empty filter",
+			args: args{
+				main:   []string{"a", "b", "c"},
+				filter: []string{},
+			},
+			want: []string{"a", "b", "c"},
+		},
+		{
+			name: "nil filter",
+			args: args{
+				main:   []string{"a", "b", "c"},
+				filter: nil,
+			},
+			want: []string{"a", "b", "c"},
+		},
+		{
+			name: "filter some",
+			args: args{
+				main:   []string{"a", "b", "c"},
+				filter: []string{"b"},
+			},
+			want: []string{"a", "c"},
+		},
+		{
+			name: "filter all",
+			args: args{
+				main:   []string{"a", "b", "c"},
+				filter: []string{"a", "b", "c"},
+			},
+			want: []string{},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := filterSlice(tt.args.main, tt.args.filter)
+			assert.Equal(t, tt.want, got, "filterSlice() = %v, want %v", got, tt.want)
+		})
+	}
 }

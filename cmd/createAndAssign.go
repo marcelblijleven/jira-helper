@@ -43,7 +43,7 @@ today.`,
 		client, err := pkg.NewJiraClient(host, user, token, httpClient)
 		cobra.CheckErr(err)
 		cobra.CheckErr(client.CreateFixVersion(version, project))
-		cobra.CheckErr(pkg.AssignVersions(body, version, client, issues...))
+		cobra.CheckErr(pkg.AssignVersions(body, version, client, issues, filter))
 	},
 }
 
@@ -51,4 +51,5 @@ func init() {
 	rootCmd.AddCommand(createAndAssignCmd)
 	createAndAssignCmd.Flags().StringVarP(&body, bodyFlagName, bodyShorthand, "", bodyUsage)
 	createAndAssignCmd.Flags().StringSliceVarP(&issues, issuesFlagName, issuesShorthand, []string{}, issuesUsage)
+	createAndAssignCmd.Flags().StringSliceVarP(&filter, filterFlagName, filterShorthand, []string{}, filterUsage)
 }

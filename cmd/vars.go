@@ -8,6 +8,7 @@ var (
 	version string
 	body    string
 	issues  []string
+	filter  []string
 )
 
 const (
@@ -38,4 +39,8 @@ const (
 	issuesFlagName  = "issues"
 	issuesShorthand = "i"
 	issuesUsage     = "The issues you want to assign to release to, can be a single issue or comma separated"
+
+	filterFlagName  = "filter"
+	filterShorthand = "f"
+	filterUsage     = "The filter flag allows you to ignore issues when assigning a release"
 )
