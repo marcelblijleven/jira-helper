@@ -64,6 +64,7 @@ Aliases:
 assignRelease, assignVersion
 
 Flags:
+-f, --filter strings       The filter flag allows you to ignore issues when assigning a release
 -h, --help                 help for assignRelease
 -i, --issues strings       The issues you want to assign to release to, can be a single issue or comma separated
 -b, --releaseBody string   The body of text which contains Jira issues, e.g. a GitHub release body
@@ -112,6 +113,7 @@ Usage:
 jira-helper createAndAssign [flags]
 
 Flags:
+-f, --filter strings       The filter flag allows you to ignore issues when assigning a release
 -h, --help                 help for createAndAssign
 -i, --issues strings       The issues you want to assign to release to, can be a single issue or comma separated
 -b, --releaseBody string   The body of text which contains Jira issues, e.g. a GitHub release body
