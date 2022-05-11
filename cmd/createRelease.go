@@ -17,7 +17,7 @@ limitations under the License.
 package cmd
 
 import (
-	"jira-helper/pkg"
+	"github.com/marcelblijleven/jira-helper/pkg"
 	"net/http"
 	"time"
 

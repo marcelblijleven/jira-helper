@@ -18,7 +18,7 @@ package cmd
 
 import (
 	"errors"
-	"jira-helper/pkg"
+	"github.com/marcelblijleven/jira-helper/pkg"
 	"net/http"
 	"time"
 

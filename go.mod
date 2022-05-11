@@ -1,4 +1,4 @@
-module jira-helper
+module github.com/marcelblijleven/jira-helper
 
 go 1.17
 

@@ -15,7 +15,7 @@ limitations under the License.
 */
 package main
 
-import "jira-helper/cmd"
+import "github.com/marcelblijleven/jira-helper/cmd"
 
 func main() {
 	cmd.Execute()
