@@ -16,7 +16,7 @@ func getDateString() string {
 }
 
 // newReleaseRequestBody creates a release request body with the provided version name and project id
-func newReleaseRequestBody(versionName, projectID string setAsReleased bool=true) (*releaseRequestBody, error) {
+func newReleaseRequestBody(versionName, projectID string, setAsReleased bool=true) (*releaseRequestBody, error) {
 	if versionName == "" {
 		return nil, errors.New("version versionName cannot be empty")
 	}
