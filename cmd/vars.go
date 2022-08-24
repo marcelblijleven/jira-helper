@@ -6,6 +6,7 @@ var (
 	token   string
 	project string
 	version string
+	released bool
 	body    string
 	issues  []string
 	filter  []string
@@ -27,6 +28,10 @@ const (
 	projectFlagName  = "project"
 	projectShorthand = "p"
 	projectUsage     = "Project key of the Jira project, e.g. MB"
+
+	releasedFlagName  = "released"
+	releasedShorthand = "r"
+	releasedUsage     = "whether to set the fix version as released or not, e.g. true"
 
 	versionFlagName  = "version"
 	versionShorthand = "v"
