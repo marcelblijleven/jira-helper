@@ -26,7 +26,7 @@ jobs:
       - name: create release in Jira
         run: docker run -i --rm ${{ env.IMAGE_NAME }} createRelease -u marcel@test.nu -s https://your-jira.address.nl -p MB -t=${{ secrets.API_TOKEN }} -v "${{ github.event.release.name }}"
       - name: assign release to Jira tickets
-        run: docker run -i --rm ${{ env.IMAGE_NAME }} assignVersion -u marcel@test.nu -s https://your-jira.address.nl -p MB -t=${{ secrets.API_TOKEN }} -v "${{ github.event.release.name }}" -b "${{ github.event.release.body }}"
+        run: docker run -i --rm ${{ env.IMAGE_NAME }} assignVersion -u marcel@test.nu -s https://your-jira.address.nl -p MB -t=${{ secrets.API_TOKEN }} -v "${{ github.event.release.name }}" -b "${{ github.event.release.body }}" -r true
 
 ```
 
@@ -49,6 +49,7 @@ Flags:
   -t, --token string     Token used to authenticate against the Jira API
   -u, --user string      User (email) for authenticating against the Jira API
   -v, --version string   Name of the version
+  -r, --released bool    Set the version as released or not, e.g. true
 
 ```
 
@@ -75,12 +76,13 @@ Global Flags:
 -t, --token string     Token used to authenticate against the Jira API
 -u, --user string      User (email) for authenticating against the Jira API
 -v, --version string   Name of the version
+-r, --released bool    Set the version as released or not, e.g. true
 ```
 
 ### Create release
 Create a fix version in Jira for the project with the provided name.
 
-The release state of the fix version will be set to "released" and the day will be set to
+If released is true then the release state of the fix version will be set to "released" and the day will be set to
 today.
 
 ```
@@ -99,13 +101,14 @@ Global Flags:
 -t, --token string     Token used to authenticate against the Jira API
 -u, --user string      User (email) for authenticating against the Jira API
 -v, --version string   Name of the version
+-r, --released bool    Set the version as released or not, e.g. true
 
 ```
 
 ### Create and assign
 Creates a fix version in Jira and assigns it to the provided issues.
 
-The release state of the fix version will be set to "released" and the day will be set to
+If released is true then the release state of the fix version will be set to "released" and the day will be set to
 today.
 
 ```
@@ -124,5 +127,6 @@ Global Flags:
 -t, --token string     Token used to authenticate against the Jira API
 -u, --user string      User (email) for authenticating against the Jira API
 -v, --version string   Name of the version
+-r, --released bool    Set the version as released or not, e.g. true
 
 ```

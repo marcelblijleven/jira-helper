@@ -129,9 +129,9 @@ func (c *JiraClient) AssignVersion(issue, version string) error {
 }
 
 // CreateFixVersion calls the version endpoint to add a fixVersion to the provided project
-func (c *JiraClient) CreateFixVersion(name, project string) error {
+func (c *JiraClient) CreateFixVersion(name, project string, released bool=true) error {
 	endpoint := apiEndpoint + "/version"
-	body, err := newReleaseRequestBody(name, project)
+	body, err := newReleaseRequestBody(name, project, released)
 
 	if err != nil {
 		return fmt.Errorf("could not create new release request body: %w", err)

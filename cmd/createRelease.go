@@ -37,7 +37,7 @@ today.`,
 		httpClient.Timeout = time.Second * 15
 		client, err := pkg.NewJiraClient(host, user, token, httpClient)
 		cobra.CheckErr(err)
-		cobra.CheckErr(client.CreateFixVersion(version, project))
+		cobra.CheckErr(client.CreateFixVersion(version, project, released))
 	},
 }
 
